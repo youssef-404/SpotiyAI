@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+body{
+    background-image: url("./assets/bg.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
