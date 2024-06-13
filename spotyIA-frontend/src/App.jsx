@@ -1,21 +1,47 @@
 import { useState } from 'react'
 import logoSpotify from './assets/Spotify_icon.svg'
 import SpotifyCard from './component/SpotifyCard'
+import noneSong from './assets/noneSong.jpg'
+import Error from './component/Error'
 
 
 function App() {
   const [spotifyLink,setSpotifyLink] = useState("");
-  const [songInfo,setSongInfo] = useState( {
-    'trackName':"happy birthday",
-    'trackArtist':"joseph allmost",
-    'trackCover' :"https://i.scdn.co/image/ab67616d00001e02e5a25ed08d1e7e0fbb440cef",
-    "predection":""
-});
+  const [error,setError] = useState(null);
+  const defaultValue =  {
+    'trackName':"Track name",
+    'trackArtist':"Track Artist",
+    'trackCover' :noneSong,
+    "prediction":""
+  };
+  const [songInfo,setSongInfo] = useState(defaultValue);
 
-function handleSubmit(e){
-  e.preventDefault();
-  
-}
+  const handleSubmit =(e) =>{
+    e.preventDefault();
+    if(spotifyLink !=""){
+      getSongData(spotifyLink);
+    }
+  }
+
+  const getSongData = async (spotifyLink)=>{
+    try{
+      const res = await fetch('/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ spotifyLink }),
+      });
+
+      const data = await res.json();
+      console.log(data);
+      setSongInfo(data);
+    }catch(err){
+      setError("The link is invalid!");
+      setInterval(()=>{setError(null)},3000);
+    }
+  }
+
 
 
  return(
@@ -40,11 +66,16 @@ function handleSubmit(e){
           value={spotifyLink}
           onChange={(e)=>setSpotifyLink(e.target.value)}
         />
+        
+        {error && <Error text={error}/>}
+        
         <button
           className="rounded-lg border border-white py-3 px-6 text-center font-sans text-xs font-bold uppercase text-white transition-all hover:opacity-75"
           type="button"
           onClick={handleSubmit}
         >Predect</button>
+
+        <p className=' font-bold'>Genre prediction : <span >{songInfo.prediction}</span></p>
       
       </div>
     </div>
