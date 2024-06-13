@@ -16,10 +16,14 @@ model = pickle.load(open('models/best_rf_model.pkl', 'rb'))
 
 
 
+client_id = os.environ.get('SPOTIFY_CLIENT_ID')
+
+
 
 app = Flask(__name__,static_folder='template/assets',template_folder='template')
 
 # Spotify API setup
+
 
 @app.route('/')
 def index():
