@@ -5,11 +5,17 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import numpy as np
 import re
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  
+
 
 # Load your machine learning model
 model = pickle.load(open('models/best_rf_model.pkl', 'rb'))
 
-# Spotify API credentials
+
+
 
 app = Flask(__name__,static_folder='template/assets',template_folder='template')
 
