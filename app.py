@@ -4,6 +4,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import numpy as np
 import re
+import requests
 
 # Load your machine learning model
 model = pickle.load(open('models/best_rf_model.pkl', 'rb'))
@@ -12,7 +13,7 @@ model = pickle.load(open('models/best_rf_model.pkl', 'rb'))
 client_id = "f98774c8cc14476c92cda148c873320b"
 client_secret = "6aed6823fd0940f7b111c8894888dcb8"
 
-app = Flask(__name__,template_folder='template')
+app = Flask(__name__,static_folder='template/assets',template_folder='template')
 
 # Spotify API setup
 sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id=client_id, client_secret=client_secret))
@@ -23,8 +24,9 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    song_link = request.get_json()['songLink']
+    song_link = request.get_json()['spotifyLink']
     track_id = extract_track_id(song_link)
+
     track_features = get_track_features(track_id)
 
     genre_mapping = {
@@ -42,8 +44,23 @@ def predict():
     ])
 
     predicted_genre = model.predict(x)
+    print(predicted_genre)
+    trackCover=""
+    
+    try:
+        res = requests.get("https://embed.spotify.com/oembed?url="+song_link)
+        if res.status_code == 200:
+            data = res.json()
+            trackCover=data['thumbnail_url']
+    except Exception:
+        trackCover="default"
 
-    return {'prediction':  genre_mapping[predicted_genre[0]]}
+    return {
+        'prediction':  genre_mapping[predicted_genre[0]],
+        'trackName': track_features['track_name'],
+        'trackArtist' :track_features['artist_name'],
+        'trackCover' : trackCover
+        }
 
 def extract_track_id(song_link):
     pattern = r'https?://open\.spotify\.com/track/([a-zA-Z0-9]+)'
@@ -54,7 +71,7 @@ def extract_track_id(song_link):
         return track_id
     else:
         return None
-# https://embed.spotify.com/oembed?url=https%3A%2F%2Fopen.spotify.com%2Ftrack%2F4KULAymBBJcPRpk1yO4dOG
+
 def get_track_features(track_id):
     track_info = sp.track(track_id)
     features = sp.audio_features(tracks=[track_id])[0]
@@ -79,5 +96,7 @@ def get_track_features(track_id):
     }
 
 
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=False)
