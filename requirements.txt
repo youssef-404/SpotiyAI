@@ -1,5 +1,4 @@
 flask
-pickle
 spotipy
 numpy
 dotenv
