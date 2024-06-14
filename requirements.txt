@@ -1,4 +1,4 @@
-flask
-spotipy
-numpy
-dotenv
+python-dotenv==1.0.1
+Flask==3.0.3
+numpy==1.26.4
+requests==2.32.3
